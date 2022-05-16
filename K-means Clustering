@@ -1,0 +1,49 @@
+
+LoanData <- loandata %>%
+select(-c(Gender, Married, Dependents, Education, Self_Employed,Property_Area, Loan_Status))
+glimpse(LoanData)
+
+rescale_LoanData <- LoanData %>%
+mutate(ApplicantIncome_scal = scale(ApplicantIncome),
+CoapplicantIncome_scal = scale(CoapplicantIncome),
+LoanAmount_scal = scale(LoanAmount),
+Loan_Amount_Term_scal = scale(Loan_Amount_Term),
+Credit_History_scal = scale(Credit_History)) %>%
+select(-c(ApplicantIncome, CoapplicantIncome,LoanAmount,Credit_History))
+
+op_k<-fviz_nbclust(rescale_LoanData, FUN = kmeans, method = "wss")
+Vop_k<-fviz_nbclust(rescale_LoanData, FUN = kmeans, method = "silhouette")
+op_k
+Vop_k
+
+set.seed(1020)
+pc_cluster_2 <-kmeans(rescale_LoanData, 2)
+pc_cluster_2$size
+
+LoanData2<-loandata %>%
+mutate(cluster= as.factor(pc_cluster_2$cluster))
+
+p11<-ggplot(LoanData2, aes(x=cluster, y=ApplicantIncome, fill=cluster)) +
+geom_boxplot()+
+labs(x= "Cluster", y= "Applicant Income",title="Cluster by Applicant Income")
+
+p12<-ggplot(LoanData2, aes(x=cluster, y=LoanAmount, fill=cluster)) +
+geom_boxplot()+
+labs(x= "Cluster", y= "Loan Amount",title="Cluster by Loan Amount")
+
+p13<-ggplot(LoanData2, aes(x=cluster, y=CoapplicantIncome, fill=cluster)) +
+geom_boxplot()+
+labs(x= "Cluster", y= "Co-applicantIncome",title="Cluster by Co-applicantIncome")
+
+p14<-ggplot(LoanData2, aes(x=cluster, y=Loan_Amount_Term, fill=cluster)) +
+geom_boxplot()+
+labs(x= "Cluster", y= "Loan Amount Term",title="Cluster by Loan Amount Term")
+
+p15<-ggplot(LoanData2, aes(x=cluster, y=Credit_History, fill=cluster)) +
+geom_boxplot()+
+labs(x= "Cluster", y= "Credit History",title="Credit History")
+
+grid.arrange(p11, p12, ncol=2)
+grid.arrange(p13, p14, ncol=2)
+p15
+
